@@ -1,0 +1,7 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4941
+
+GitHub repository: https://github.com/someboddy/vim-vebugger
+
+Vebugger is yet another debugger frontend plugin for Vim, created because I wasn't happy with the other debugger plugins I found. Vebugger currently supports GDB, JDB, PDB and RDebug.
+
+Vebugger is developed under Linux. I'll try it under Windows once I feel like setting a Windows development environment, and fix what needs to be fixed to make it work there. I have neither plans nor means to support OSX, but I will accept pull requests that add OSX support.
