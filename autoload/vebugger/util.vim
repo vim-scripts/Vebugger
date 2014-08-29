@@ -86,11 +86,31 @@ endfunction
 
 "Return a tool's(usually debugger) full path, or revert to default if that
 "path is not defined
-function! vebugger#util#getToolFullPath(toolName,default)
+function! vebugger#util#getToolFullPath(toolName,version,default)
 	let l:optionName='vebugger_path_'.a:toolName
+	if !empty(a:version)
+		let l:optionName=l:optionName.'_'.a:version
+	endif
 	if exists('g:'.l:optionName)
 		return g:[l:optionName]
 	else
-		return a:default
+		if type({})==type(a:default)
+			if !empty(a:version) && has_key(a:default,a:version)
+				return a:default[a:version]
+			else
+				return a:default[' ']
+			endif
+		else
+			return a:default
+		endif
+	endif
+endfunction
+
+"Checks if the path is an absolute path
+function! vebugger#util#isPathAbsolute(path)
+	if has('win32')
+		return a:path=~':' || a:path[0]=='%' "Absolute paths in Windows contain : or start with an environment variable
+	else
+		return a:path[0]=~'\v^[/~$]' "Absolute paths in Linux start with ~(home),/(root dir) or $(environment variable)
 	endif
 endfunction

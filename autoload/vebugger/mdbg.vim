@@ -6,7 +6,7 @@ function! vebugger#mdbg#searchAndAttach(binaryFile,srcpath)
 endfunction
 
 function! vebugger#mdbg#start(binaryFile,args)
-	let l:debugger=vebugger#std#startDebugger(shellescape(vebugger#util#getToolFullPath('mdbg','Mdbg.exe')))
+	let l:debugger=vebugger#std#startDebugger(shellescape(vebugger#util#getToolFullPath('mdbg',get(a:args,'version'),'Mdbg')))
 	let l:debugger.state.mdbg={'breakpointNumbers':{}}
 	let l:debugger.readResultTemplate.mdbg={'breakpointBound':{}}
 
@@ -53,6 +53,9 @@ function! vebugger#mdbg#start(binaryFile,args)
 endfunction
 
 function! s:findFilePath(src,fileName,methodName)
+	if vebugger#util#isPathAbsolute(a:fileName)
+		return fnamemodify(a:fileName,':p') "Return the normalized full path
+	endif
 	let l:path=fnamemodify(a:src,':p')
 	let l:files=glob(l:path.'**/'.a:fileName,0,1)
 	for l:dirname in split(a:methodName,'\.')
@@ -73,7 +76,7 @@ endfunction
 
 function! s:readWhere(pipeName,line,readResult,debugger)
 	if 'out'==a:pipeName
-		let l:matches=matchlist(a:line,'\v^\*(\d+)\.\s*([A-Za-z_.]+)\s*\(([A-Za-z_.]+):(\d+)\)')
+		let l:matches=matchlist(a:line,'\v^\*(\d+)\.\s*([A-Za-z0-9_.+<>]+)\s*\((.+):(\d+)\)')
 		if 3<len(l:matches)
 			let l:frameNumber=str2nr(l:matches[1])
 			let l:file=s:findFilePath(a:debugger.state.mdbg.srcpath,l:matches[3],l:matches[2])
@@ -143,7 +146,8 @@ function! s:breakpointAdded(readResult,debugger)
 	if !empty(a:readResult.mdbg.breakpointBound)
 		let l:breakpointBound=a:readResult.mdbg.breakpointBound
 		let l:lookFor=l:breakpointBound.fileNameTail.':'.l:breakpointBound.line
-		let l:matchingKeys=filter(keys(a:debugger.state.mdbg.breakpointNumbers),'fnamemodify(v:val,":t")==l:lookFor')
+		let l:lookForRegex='\V'.escape(l:lookFor,'\').'\$'
+		let l:matchingKeys=filter(keys(a:debugger.state.mdbg.breakpointNumbers),'v:val=~l:lookForRegex')
 		for l:key in l:matchingKeys
 			if empty(a:debugger.state.mdbg.breakpointNumbers[l:key])
 				let a:debugger.state.mdbg.breakpointNumbers[l:key]={'number':l:breakpointBound.breakpointNumber}
