@@ -4,7 +4,7 @@
 Author:  Idan Arye <https://github.com/idanarye/>
 License: Same terms as Vim itself (see |license|)
 
-Version: 1.2.2
+Version: 1.2.3+
 
 INTRODUCTION                                                       *vebugger*
 
@@ -94,6 +94,13 @@ argument is supplied when running the debugger:
 *g:vebugger_path_mdbg_32*  No default - use it for the 32bit version of Mdbg
 *g:vebugger_path_mdbg_64*  No default - use it for the 64bit version of Mdbg
 
+When stepping into functions in unopened files, they are opened with :new by
+default. This can be configured by setting *g:vebugger_view_source_cmd*
+
+Example: >
+    let g:vebugger_view_source_cmd='edit'
+<
+
 LAUNCHING DEBUGGERS                                      *vebugger-launching*
 
 A debugger's implementation is responsible for starting it. The standard is to
@@ -117,6 +124,7 @@ GDB can be launched with *vebugger#gdb#start*
 The supported extra arguments are:
 * "args": Command line arguments for the debugged program
 * "pid": Process id to attach to
+* "con": URL of GDB-server to connect to
 * "entry": The entry point for starting the debugging(default "main")
 * "version": The version of the debugger to run
 You can't specify both ("args" and/or "entry") and "pid".
@@ -130,6 +138,10 @@ attach to, and attaches to them:
 >
    VBGattachGDB a.out
 <
+
+VBGattachGDB accepts as a second argument the process ID of the process to
+attach to or the URL for a GDB-server to connect to.
+
 The *VBGstartGDBForD* command is the same as VBGstartGDB but for Dlang
 programs.
 

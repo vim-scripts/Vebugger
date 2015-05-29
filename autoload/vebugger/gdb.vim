@@ -1,10 +1,3 @@
-function! vebugger#gdb#searchAndAttach(binaryFile)
-	let l:processId=vebugger#util#selectProcessOfFile(a:binaryFile)
-	if 0<l:processId
-		call vebugger#gdb#start(a:binaryFile,{'pid':l:processId})
-	endif
-endfunction
-
 function! vebugger#gdb#start(binaryFile,args)
 	let l:debugger=vebugger#std#startDebugger(shellescape(vebugger#util#getToolFullPath('gdb',get(a:args,'version'),'gdb'))
 				\.' -i mi --silent '.fnameescape(a:binaryFile))
@@ -17,6 +10,8 @@ function! vebugger#gdb#start(binaryFile,args)
 
 	if get(a:args,'pid') "Attach to process
 		call l:debugger.writeLine('attach '.string(a:args.pid))
+	elseif has_key(a:args,'con') "Attach to gdbserver
+		call l:debugger.writeLine('target remote '.a:args.con)
 	else
 		call l:debugger.writeLine('set args '.vebugger#util#commandLineArgsForProgram(a:args).' 1>&2')
 		if !has('win32')
